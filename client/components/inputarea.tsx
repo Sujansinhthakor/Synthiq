@@ -4,6 +4,7 @@ import { Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Chat } from "./chat_ai";
 import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
 
 interface MyInputProps {
   setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
@@ -45,7 +46,6 @@ export function InputArea(props: MyInputProps) {
 
       props.setChats((prev) => [...prev, { text: currentInput, type: "user" }]);
       props.setChats((prev) => [...prev, { text: "Connecting to server...", type: "bot" }]);
-
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         console.log(apiUrl);
@@ -79,6 +79,11 @@ export function InputArea(props: MyInputProps) {
 
                 if (data.status === "DONE") {
                   props.setUrl(data.url);
+                  toast('Remember to download your video and copy your code! Unsaved progress is lost on page refresh.', {
+                    duration: 2000,
+                    position: 'bottom-right',
+                    icon: 'ℹ️',
+                  });
                   if (data.code) {
                     props.setSnippet(JSON.parse(data.code));
                   }

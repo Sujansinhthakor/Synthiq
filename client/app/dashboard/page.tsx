@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Code, ChevronDown } from "lucide-react";
 import Code_Block from "@/components/code";
 import ChatAI from "@/components/chat_ai";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
   return (
@@ -111,7 +112,7 @@ class MyScene(Scene):
         {/* Right panel — Video + Code overlay */}
         <div className="w-1/2 flex flex-col bg-layer-1 relative overflow-hidden">
           {/* Video section — always takes full height */}
-          <div className="flex-1 p-4 flex items-center justify-center">
+          <div className="flex-1 p-4 flex flex-col items-center justify-center">
             <div className="w-full max-w-[90%] aspect-video rounded-xl overflow-hidden bg-layer-2 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
               {url ? (
                 <ReactPlayer
