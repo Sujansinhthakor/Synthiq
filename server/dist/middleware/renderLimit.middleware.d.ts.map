@@ -1,0 +1,1 @@
+{"version":3,"file":"renderLimit.middleware.d.ts","sourceRoot":"","sources":["../../src/middleware/renderLimit.middleware.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,YAAY,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAE/D,QAAA,MAAM,WAAW,aAAoB,CAAC;AAEtC,QAAA,MAAM,WAAW,GAAI,KAAK,OAAO,EAAE,KAAK,QAAQ,EAAE,MAAM,YAAY,mDAcnE,CAAA;AACD,OAAO,EAAE,WAAW,EAAE,WAAW,EAAE,CAAA"}

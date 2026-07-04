@@ -19,11 +19,7 @@ export function InputArea(props: MyInputProps) {
   const idToken = session?.user?.customenToken;
 
   const [inputValue, setInputValue] = useState("");
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 95832d6b9eef8b14ba58bb96bda8bc5498ab4c46
+
 
   // When a prompt chip is clicked, populate the input
   useEffect(() => {
@@ -34,10 +30,7 @@ export function InputArea(props: MyInputProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.pendingPrompt]);
 
-<<<<<<< HEAD
->>>>>>> 95832d6 (changes)
-=======
->>>>>>> 95832d6b9eef8b14ba58bb96bda8bc5498ab4c46
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
   };
@@ -54,7 +47,8 @@ export function InputArea(props: MyInputProps) {
       props.setChats((prev) => [...prev, { text: "Connecting to server...", type: "bot" }]);
 
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        console.log(apiUrl);
         const response = await fetch(`${apiUrl}/generate`, {
           method: "POST",
           headers: {
@@ -138,11 +132,10 @@ export function InputArea(props: MyInputProps) {
       <button
         onClick={handleOnClick}
         disabled={!isActive}
-        className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-150 ${
-          isActive
-            ? "bg-white text-black hover:bg-zinc-200 active:scale-[0.95] cursor-pointer"
-            : "bg-layer-3 text-zinc-600 cursor-not-allowed"
-        }`}
+        className={`flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-150 ${isActive
+          ? "bg-white text-black hover:bg-zinc-200 active:scale-[0.95] cursor-pointer"
+          : "bg-layer-3 text-zinc-600 cursor-not-allowed"
+          }`}
       >
         <Send size={16} />
       </button>

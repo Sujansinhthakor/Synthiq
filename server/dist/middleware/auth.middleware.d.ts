@@ -7,7 +7,5 @@ declare global {
     }
 }
 declare const authMiddleware: (req: Request, res: Response, next: NextFunction) => any;
-declare const activeUsers: Set<string>;
-declare const renderLimit: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
-export { authMiddleware, renderLimit, activeUsers };
+export default authMiddleware;
 //# sourceMappingURL=auth.middleware.d.ts.map

@@ -19,17 +19,5 @@ const authMiddleware = (req, res, next) => {
         return res.status(401).json({ error: "Unauthorized: Invalid token" });
     }
 };
-const activeUsers = new Set();
-const renderLimit = (req, res, next) => {
-    const email = req.user.email;
-    if (activeUsers.has(email)) {
-        return res.status(429).json({ error: "Too many requests" });
-    }
-    activeUsers.add(email);
-    res.on("close", () => {
-        activeUsers.delete(email);
-    });
-    next();
-};
-export { authMiddleware, renderLimit, activeUsers };
+export default authMiddleware;
 //# sourceMappingURL=auth.middleware.js.map

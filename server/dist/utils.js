@@ -1,4 +1,3 @@
-import express from "express";
 import path from "node:path";
 import OpenAI from 'openai';
 import fs from 'fs/promises';
@@ -113,6 +112,13 @@ const processAnimationRequest = async (userPrompt, onProgress) => {
         emit("UPLOADING", "Uploading video to Cloud...");
         const s3Objectkey = crypto.randomUUID() + '.mp4';
         await uploadVideoToS3(videoFilePath, s3Objectkey);
+        // Delete the local job folder 
+        try {
+            await fs.rm(path.dirname(videoFilePath), { recursive: true, force: true });
+        }
+        catch (err) {
+            console.error("Failed to delete local job directory:", err);
+        }
         const videoURL = await getObjectURL(s3Objectkey);
         emit("DONE", "Video generation complete", { url: videoURL, code: JSON.stringify(manim_code) });
         return videoURL;

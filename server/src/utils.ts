@@ -1,4 +1,3 @@
-import express from "express";
 import path from "node:path";
 import OpenAI from 'openai'
 import fs from 'fs/promises'

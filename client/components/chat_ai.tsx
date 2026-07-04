@@ -40,14 +40,6 @@ const examplePrompts = [
 
 const ChatAI = (props: MyMainDivProps) => {
     const [chats, setChats] = useState<Chat[]>([]);
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    return (
-        <div className="flex flex-col h-full pt-5">
-            <div className="flex-1 overflow-y-auto no-scrollbar">
-                <Chats chats={chats} />
-=======
     const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
 
     const handleChipClick = (prompt: string) => {
@@ -55,15 +47,6 @@ const ChatAI = (props: MyMainDivProps) => {
     };
 
     return (
-=======
-    const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
-
-    const handleChipClick = (prompt: string) => {
-        setPendingPrompt(prompt);
-    };
-
-    return (
->>>>>>> 95832d6b9eef8b14ba58bb96bda8bc5498ab4c46
         <div className="flex flex-col h-full">
             {/* Chat messages */}
             <div className="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20">
@@ -95,10 +78,7 @@ const ChatAI = (props: MyMainDivProps) => {
                 ) : (
                     <Chats chats={chats} />
                 )}
-<<<<<<< HEAD
->>>>>>> 95832d6 (changes)
-=======
->>>>>>> 95832d6b9eef8b14ba58bb96bda8bc5498ab4c46
+
             </div>
 
             {/* Input area */}
