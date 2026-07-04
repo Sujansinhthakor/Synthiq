@@ -80,7 +80,7 @@ export function InputArea(props: MyInputProps) {
                 if (data.status === "DONE") {
                   props.setUrl(data.url);
                   toast('Remember to download your video and copy your code! Unsaved progress is lost on page refresh.', {
-                    duration: 2000,
+                    duration: 5000,
                     position: 'bottom-right',
                     icon: 'ℹ️',
                   });
