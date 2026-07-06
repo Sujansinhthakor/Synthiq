@@ -1,7 +1,11 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import jwt from "jsonwebtoken";
+import { adapter } from "next/dist/server/web/adapter";
+import { prisma } from "@/prisma/prisma";
 const handler = NextAuth({
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -17,7 +21,7 @@ const handler = NextAuth({
           {
             email: profile?.email,
           },
-          process.env.NEXTAUTH_SECRET!
+          process.env.NEXTAUTH_SECRET!,
         );
         console.log(jwtToken);
         token.customenToken = jwtToken;

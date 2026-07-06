@@ -1,8 +1,8 @@
 import path from "node:path";
-import OpenAI from 'openai';
-import fs from 'fs/promises';
+import OpenAI from "openai";
+import fs from "fs/promises";
 import { spawn } from "node:child_process";
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client, } from "@aws-sdk/client-s3";
 import "dotenv/config";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import instructions_prompt from "./prompt.js";
@@ -17,8 +17,8 @@ const s3Client = new S3Client({
     region: region,
     credentials: {
         accessKeyId,
-        secretAccessKey
-    }
+        secretAccessKey,
+    },
 });
 const openAIClient = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -30,28 +30,79 @@ function parseCodeBlock(input) {
         return match[1].trim();
     return input.replace(/^["'\s`]+|["'\s`]+$/g, "").trim();
 }
-const runDocker = (jobDir) => {
+const runDocker = async (jobDir) => {
+    // Ensure output directory exists
+    await fs.mkdir(path.join(jobDir, "output"), { recursive: true });
     return new Promise((resolve, reject) => {
+        const TIMEOUT_MS = 60_000;
+        const containerName = `manim-${crypto.randomUUID()}`;
+        let stdout = "";
+        let stderr = "";
+        let finished = false;
         const docker = spawn("docker", [
             "run",
             "--rm",
+            "--name",
+            containerName,
+            // Disable all networking
+            "--network",
+            "none",
+            // Resource limits
+            "--cpus",
+            "1",
+            "--memory",
+            "512m",
+            "--pids-limit",
+            "64",
+            // Security
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges",
+            // Mount the entire isolated job directory
             "-v",
             `${jobDir}:/workspace`,
+            // Pin to a tested version instead of "stable"
             "manimcommunity/manim:stable",
             "manim",
             "-qm",
             "/workspace/main.py",
             "MyScene",
             "-o",
-            "/workspace/output"
+            "/workspace/output",
         ]);
-        docker.stdout.on("data", d => console.log(d.toString()));
-        docker.stderr.on("data", d => console.error(d.toString()));
-        docker.on("close", code => {
-            if (code === 0)
+        const timer = setTimeout(async () => {
+            if (finished)
+                return;
+            finished = true;
+            // Kill the actual container
+            spawn("docker", ["kill", containerName]);
+            reject(new Error(`Execution timed out after ${TIMEOUT_MS / 1000} seconds`));
+        }, TIMEOUT_MS);
+        docker.stdout.on("data", (data) => {
+            stdout += data.toString();
+        });
+        docker.stderr.on("data", (data) => {
+            stderr += data.toString();
+        });
+        docker.on("error", (err) => {
+            if (finished)
+                return;
+            finished = true;
+            clearTimeout(timer);
+            reject(err);
+        });
+        docker.on("close", (code) => {
+            if (finished)
+                return;
+            finished = true;
+            clearTimeout(timer);
+            if (code === 0) {
                 resolve();
-            else
-                reject(new Error(`Docker exited with ${code}`));
+            }
+            else {
+                reject(new Error(`Docker exited with code ${code}\n\n${stderr || stdout}`));
+            }
         });
     });
 };
@@ -71,7 +122,7 @@ const uploadVideoToS3 = async (filePath, s3Objectkey) => {
             Bucket: bucketName,
             Key: s3Objectkey,
             Body: fileBuffer,
-            ContentType: "video/mp4"
+            ContentType: "video/mp4",
         };
         const command = new PutObjectCommand(uploadParams);
         await s3Client.send(command);
@@ -93,7 +144,7 @@ const generateManimCode = async (userPrompt) => {
 const getObjectURL = async (key) => {
     const command = new GetObjectCommand({
         Bucket: "synthiq",
-        Key: key
+        Key: key,
     });
     const url = await getSignedUrl(s3Client, command);
     return url;
@@ -103,30 +154,46 @@ const processAnimationRequest = async (userPrompt, onProgress) => {
         if (onProgress)
             onProgress(status, message, data);
     };
+    let videoPath;
     try {
         emit("STARTING", "Starting generation...");
         emit("GENERATING_CODE", "Writing Manim code with AI...");
         const manim_code = await generateManimCode(userPrompt);
         emit("RENDERING", "Rendering video with Manim...");
         const videoFilePath = await renderManim(manim_code);
+        videoPath = videoFilePath;
         emit("UPLOADING", "Uploading video to Cloud...");
-        const s3Objectkey = crypto.randomUUID() + '.mp4';
+        const s3Objectkey = crypto.randomUUID() + ".mp4";
         await uploadVideoToS3(videoFilePath, s3Objectkey);
-        // Delete the local job folder 
+        // Delete the local job folder
         try {
-            await fs.rm(path.dirname(videoFilePath), { recursive: true, force: true });
+            await fs.rm(path.dirname(videoFilePath), {
+                recursive: true,
+                force: true,
+            });
         }
         catch (err) {
             console.error("Failed to delete local job directory:", err);
         }
         const videoURL = await getObjectURL(s3Objectkey);
-        emit("DONE", "Video generation complete", { url: videoURL, code: JSON.stringify(manim_code) });
+        emit("DONE", "Video generation complete", {
+            url: videoURL,
+            code: JSON.stringify(manim_code),
+        });
         return videoURL;
     }
     catch (error) {
         console.error("Error generating Manim code or processing video:", error);
         emit("ERROR", error.message || "An error occurred");
         throw error;
+    }
+    finally {
+        if (videoPath) {
+            await fs.rm(videoPath, {
+                recursive: true,
+                force: true,
+            });
+        }
     }
 };
 export { processAnimationRequest };
