@@ -42,3 +42,4 @@ next-env.d.ts
 
 # ignore jobs folder
 job/
+dist/

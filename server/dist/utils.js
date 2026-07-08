@@ -159,6 +159,7 @@ const processAnimationRequest = async (userPrompt, onProgress) => {
         emit("STARTING", "Starting generation...");
         emit("GENERATING_CODE", "Writing Manim code with AI...");
         const manim_code = await generateManimCode(userPrompt);
+        console.log(manim_code);
         emit("RENDERING", "Rendering video with Manim...");
         const videoFilePath = await renderManim(manim_code);
         videoPath = videoFilePath;
